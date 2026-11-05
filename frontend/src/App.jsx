@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import StudentProfilePage from './pages/StudentProfilePage';
 import EmployerProfilePage from './pages/EmployerProfilePage';
 import PlaceholderPage from './pages/PlaceholderPage';
+import HomePage from './pages/HomePage';
 import './App.css';
 
 const SV = ['STUDENT'];
@@ -19,7 +20,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
-            <Route path="/" element={<PlaceholderPage title="Tìm việc làm" sprint="Sprint 3 (Buổi 7)" />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
