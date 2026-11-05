@@ -6,8 +6,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity; // MỚI
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,11 +62,18 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(404, "Không tìm thấy đường dẫn " + ex.getResourcePath()));
     }
 
-    // MỚI: gọi sai phương thức (ví dụ POST vào API chỉ nhận GET) -> 405 thay vì 500
+    // Gọi sai phương thức (ví dụ POST vào API chỉ nhận GET) -> 405 thay vì 500
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponse> handleWrongMethod(HttpRequestMethodNotSupportedException ex) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ErrorResponse.of(405, "Sai phương thức: API này không nhận " + ex.getMethod()));
+    }
+
+    // MỚI: gửi sai kiểu dữ liệu (ví dụ tải CV bằng JSON thay vì form-data) -> 415 thay vì 500
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleWrongMediaType(HttpMediaTypeNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(ErrorResponse.of(415, "Sai kiểu dữ liệu gửi lên: " + ex.getContentType()));
     }
 
     @ExceptionHandler(Exception.class)
