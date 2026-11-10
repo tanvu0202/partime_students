@@ -14,10 +14,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-/** Bắt lỗi ở mọi controller và trả JSON thống nhất (B6-04). */
+/** Bắt lỗi ở mọi controller và trả JSON thống nhất. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -74,6 +75,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleWrongMediaType(HttpMediaTypeNotSupportedException ex) {
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                 .body(ErrorResponse.of(415, "Sai kiểu dữ liệu gửi lên: " + ex.getContentType()));
+    }
+
+    // Tham số sai kiểu, ví dụ /api/jobs/abc hoặc page=xyz -> 400 thay vì 500
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of(400, "Giá trị không hợp lệ cho tham số '" + ex.getName() + "'"));
     }
 
     @ExceptionHandler(Exception.class)
