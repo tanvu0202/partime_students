@@ -6,6 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
+
 public interface JobPostRepository extends JpaRepository<JobPost, Long>, JpaSpecificationExecutor<JobPost> {
     Page<JobPost> findByEmployerId(Long employerId, Pageable pageable);
+
+    /** Trang "Tin của tôi": tin mới nhất lên đầu. */
+    List<JobPost> findByEmployerIdOrderByCreatedAtDesc(Long employerId);
 }

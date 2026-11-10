@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Lớp bảo mật (B6-01): JWT không trạng thái, BCrypt, phân quyền 3 vai trò, CORS cho React (B6-10).
+ * Lớp bảo mật: JWT không trạng thái, BCrypt, phân quyền 3 vai trò, CORS cho React.
  * Token được kiểm tra bởi bộ lọc Bearer token có sẵn của Spring Security (oauth2-resource-server).
  */
 @Configuration
@@ -51,7 +51,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/api/hello", "/error").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                // Thứ tự quan trọng – luật cụ thể đặt trước luật chung
+                .requestMatchers(HttpMethod.GET, "/api/jobs/*/applications").hasRole("EMPLOYER")
                 .requestMatchers(HttpMethod.GET, "/api/jobs", "/api/jobs/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/jobs/*/applications").hasRole("STUDENT")
+                .requestMatchers("/api/jobs", "/api/jobs/**").hasRole("EMPLOYER")
+                .requestMatchers("/api/applications/me").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.PATCH, "/api/applications/*/status").hasRole("EMPLOYER")
                 .requestMatchers("/api/students/**").hasRole("STUDENT")
                 .requestMatchers("/api/employers/**").hasRole("EMPLOYER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
