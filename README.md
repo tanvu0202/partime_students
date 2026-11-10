@@ -56,6 +56,24 @@ docs/postman/                          Postman collection + environment
 | POST | /api/students/me/cv | Sinh viên (PDF/DOCX ≤ 5MB) |
 | GET, PUT | /api/employers/me | Nhà tuyển dụng |
 
+## API đã có (Sprint 3)
+| Phương thức | Đường dẫn | Ai gọi được |
+|---|---|---|
+| GET | /api/jobs?keyword=&category=&location=&minSalary=&maxSalary=&salaryUnit=&sort=newest\|salary&page=0&size=10 | Ai cũng gọi được |
+| GET | /api/jobs/{id}, /api/jobs/categories | Ai cũng gọi được |
+| POST | /api/jobs | Nhà tuyển dụng |
+| PUT, DELETE | /api/jobs/{id} | Nhà tuyển dụng (chủ tin) |
+| PATCH | /api/jobs/{id}/close | Nhà tuyển dụng (chủ tin) |
+| GET | /api/employers/me/jobs, /api/employers/me/jobs/{id} | Nhà tuyển dụng |
+| POST | /api/jobs/{id}/applications | Sinh viên |
+| GET | /api/applications/me | Sinh viên |
+| GET | /api/jobs/{id}/applications | Nhà tuyển dụng (chủ tin) |
+| PATCH | /api/applications/{id}/status (body `{"status":"ACCEPTED"}` hoặc `REJECTED`) | Nhà tuyển dụng (chủ tin) |
+
+Script bổ sung ở Sprint 3 (chạy trong MySQL Workbench):
+- `backend/docs/sql/index_job_posts.sql` – thêm index cho tìm kiếm (chạy 1 lần)
+- `docs/sql/seed_1000_jobs.sql` – sinh 1.000 tin giả để đo tốc độ tìm kiếm (NFR-01 < 2 giây)
+
 Gửi kèm header `Authorization: Bearer <token>` với mọi API trừ đăng ký, đăng nhập.
 Lỗi trả về dạng `{ "status": 400, "message": "...", "errors": { "tênTrường": "lý do" } }`.
 
