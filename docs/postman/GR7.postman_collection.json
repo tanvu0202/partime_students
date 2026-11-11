@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "GR7 – PartTimeSV API (Sprint 2)",
-    "description": "Chạy lần lượt từ trên xuống (Run collection). Cần chọn environment 'GR7 Local'. Tài khoản mẫu: sv1@gr7.vn, ntd1@gr7.vn, admin@gr7.vn – mật khẩu 12345678.",
+    "name": "GR7 – PartTimeSV API (Sprint 2 – Sprint 3)",
+    "description": "Chạy lần lượt từ trên xuống (Run collection). Cần chọn environment 'GR7 Local'. Tài khoản mẫu: sv1@gr7.vn, ntd1@gr7.vn, ntd2@gr7.vn, admin@gr7.vn – mật khẩu 12345678. Thư mục 4, 5 tự tạo tin mới mỗi lần chạy nên chạy lại nhiều lần vẫn đạt.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -752,6 +752,1541 @@
                 "api",
                 "employers",
                 "me"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Tin tuyển dụng (PB-05 → PB-08)",
+      "item": [
+        {
+          "name": "Đăng tin mới → 201 (lưu jobId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 201\", () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Tin mới ở trạng thái OPEN\", () => pm.expect(j.status).to.eql(\"OPEN\"));",
+                  "pm.environment.set(\"jobId\", j.id);",
+                  "pm.environment.set(\"jobTitle\", j.title);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Phục vụ quán trà sữa ca tối {{$randomInt}}\",\n  \"description\": \"Pha chế, phục vụ, dọn dẹp. Ưu tiên sinh viên năm 1-2.\",\n  \"category\": \"F&B\",\n  \"location\": \"Bình Thạnh, TP.HCM\",\n  \"salaryMin\": 25000,\n  \"salaryMax\": 30000,\n  \"salaryUnit\": \"HOUR\",\n  \"workTime\": \"18:00–22:00, T2–T6\",\n  \"slots\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Đăng tin thiếu tiêu đề → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Báo lỗi ở trường title\", () => pm.expect(pm.response.json().errors).to.have.property(\"title\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"description\": \"Pha chế, phục vụ, dọn dẹp. Ưu tiên sinh viên năm 1-2.\",\n  \"category\": \"F&B\",\n  \"location\": \"Bình Thạnh, TP.HCM\",\n  \"salaryMin\": 25000,\n  \"salaryMax\": 30000,\n  \"salaryUnit\": \"HOUR\",\n  \"workTime\": \"18:00–22:00, T2–T6\",\n  \"slots\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Đăng tin lương tối thiểu > tối đa → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Phục vụ quán trà sữa ca tối {{$randomInt}}\",\n  \"description\": \"Pha chế, phục vụ, dọn dẹp. Ưu tiên sinh viên năm 1-2.\",\n  \"category\": \"F&B\",\n  \"location\": \"Bình Thạnh, TP.HCM\",\n  \"salaryMin\": 50000,\n  \"salaryMax\": 30000,\n  \"salaryUnit\": \"HOUR\",\n  \"workTime\": \"18:00–22:00, T2–T6\",\n  \"slots\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "SV đăng tin → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSV}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Phục vụ quán trà sữa ca tối {{$randomInt}}\",\n  \"description\": \"Pha chế, phục vụ, dọn dẹp. Ưu tiên sinh viên năm 1-2.\",\n  \"category\": \"F&B\",\n  \"location\": \"Bình Thạnh, TP.HCM\",\n  \"salaryMin\": 25000,\n  \"salaryMax\": 30000,\n  \"salaryUnit\": \"HOUR\",\n  \"workTime\": \"18:00–22:00, T2–T6\",\n  \"slots\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Không token đăng tin → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Phục vụ quán trà sữa ca tối {{$randomInt}}\",\n  \"description\": \"Pha chế, phục vụ, dọn dẹp. Ưu tiên sinh viên năm 1-2.\",\n  \"category\": \"F&B\",\n  \"location\": \"Bình Thạnh, TP.HCM\",\n  \"salaryMin\": 25000,\n  \"salaryMax\": 30000,\n  \"salaryUnit\": \"HOUR\",\n  \"workTime\": \"18:00–22:00, T2–T6\",\n  \"slots\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Sửa tin của mình → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Số lượng đã đổi thành 3\", () => pm.expect(pm.response.json().slots).to.eql(3));",
+                  "pm.environment.set(\"jobTitle\", pm.response.json().title);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Phục vụ quán trà sữa (đã sửa) {{$randomInt}}\",\n  \"description\": \"Pha chế, phục vụ, dọn dẹp. Ưu tiên sinh viên năm 1-2.\",\n  \"category\": \"F&B\",\n  \"location\": \"Bình Thạnh, TP.HCM\",\n  \"salaryMin\": 25000,\n  \"salaryMax\": 30000,\n  \"salaryUnit\": \"HOUR\",\n  \"workTime\": \"18:00–22:00, T2–T6\",\n  \"slots\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Đăng nhập NTD thứ hai → 200 (lưu tokenNTD2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.environment.set(\"tokenNTD2\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ntd2@gr7.vn\",\n  \"password\": \"12345678\"\n}"
+            }
+          }
+        },
+        {
+          "name": "NTD khác sửa tin → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Phục vụ quán trà sữa ca tối {{$randomInt}}\",\n  \"description\": \"Pha chế, phục vụ, dọn dẹp. Ưu tiên sinh viên năm 1-2.\",\n  \"category\": \"F&B\",\n  \"location\": \"Bình Thạnh, TP.HCM\",\n  \"salaryMin\": 25000,\n  \"salaryMax\": 30000,\n  \"salaryUnit\": \"HOUR\",\n  \"workTime\": \"18:00–22:00, T2–T6\",\n  \"slots\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Tìm kiếm không lọc → 200 (< 2 giây)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test(\"Có danh sách và tổng số tin\", () => { pm.expect(p.content).to.be.an(\"array\"); pm.expect(p.totalElements).to.be.above(0); });",
+                  "pm.test(\"Thời gian phản hồi < 2000 ms (NFR-01)\", () => pm.expect(pm.response.responseTime).to.be.below(2000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tìm theo từ khóa + ngành + địa điểm → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test(\"Mọi tin đều thuộc ngành F&B\", () => p.content.forEach(j => pm.expect(j.category).to.eql(\"F&B\")));",
+                  "pm.test(\"Mọi tin đều ở Bình Thạnh\", () => p.content.forEach(j => pm.expect(j.location).to.include(\"Bình Thạnh\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs?keyword=phục vụ&category=F%26B&location=Bình Thạnh&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "phục vụ"
+                },
+                {
+                  "key": "category",
+                  "value": "F%26B"
+                },
+                {
+                  "key": "location",
+                  "value": "Bình Thạnh"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lọc lương từ 30.000đ/giờ → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Lương cao nhất của mỗi tin ≥ 30.000\", () => pm.response.json().content.forEach(j => pm.expect(Number(j.salaryMax ?? j.salaryMin)).to.be.at.least(30000)));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs?minSalary=30000&salaryUnit=HOUR&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "minSalary",
+                  "value": "30000"
+                },
+                {
+                  "key": "salaryUnit",
+                  "value": "HOUR"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Phân trang trang 2, mỗi trang 5 tin → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test(\"Đúng trang 1 (tính từ 0), cỡ trang 5\", () => { pm.expect(p.page).to.eql(1); pm.expect(p.size).to.eql(5); pm.expect(p.content.length).to.be.at.most(5); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs?page=1&size=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lương từ > lương đến → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs?minSalary=50000&maxSalary=10000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "minSalary",
+                  "value": "50000"
+                },
+                {
+                  "key": "maxSalary",
+                  "value": "10000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xem chi tiết tin → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Đúng tin vừa đăng, có tên công ty\", () => { pm.expect(j.id).to.eql(Number(pm.environment.get(\"jobId\"))); pm.expect(j.companyName).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xem tin không tồn tại → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mã tin sai kiểu → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Số tin theo ngành nghề → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Có ít nhất 1 ngành\", () => pm.expect(pm.response.json().length).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tin của tôi (NTD) → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Có tin vừa đăng\", () => pm.expect(pm.response.json().map(j => j.id)).to.include(Number(pm.environment.get(\"jobId\"))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employers/me/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "employers",
+                "me",
+                "jobs"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Ứng tuyển và duyệt (PB-09 → PB-11)",
+      "item": [
+        {
+          "name": "SV ứng tuyển → 201 (lưu appId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 201\", () => pm.response.to.have.status(201));",
+                  "const a = pm.response.json();",
+                  "pm.test(\"Đơn mới ở trạng thái PENDING\", () => pm.expect(a.status).to.eql(\"PENDING\"));",
+                  "pm.environment.set(\"appId\", a.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSV}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}",
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverLetter\": \"Em là sinh viên năm 2, rảnh các buổi tối trong tuần.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "SV ứng tuyển lần 2 → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSV}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}",
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverLetter\": \"Nộp lại\"\n}"
+            }
+          }
+        },
+        {
+          "name": "NTD ứng tuyển → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}",
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Ứng tuyển tin không tồn tại → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSV}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/999999/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "999999",
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Đơn của tôi (SV) → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Có đơn vừa nộp\", () => pm.expect(pm.response.json().map(a => a.id)).to.include(Number(pm.environment.get(\"appId\"))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSV}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "NTD xem ứng viên của tin → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Có 1 ứng viên, có họ tên\", () => { const l = pm.response.json(); pm.expect(l.length).to.eql(1); pm.expect(l[0].fullName).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}",
+                "applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "NTD khác xem ứng viên → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}",
+                "applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SV xem ứng viên → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSV}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}",
+                "applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Duyệt với trạng thái PENDING → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/{{appId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{appId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PENDING\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Trạng thái không hợp lệ → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/{{appId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{appId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"OK\"\n}"
+            }
+          }
+        },
+        {
+          "name": "NTD khác duyệt đơn → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/{{appId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{appId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACCEPTED\"\n}"
+            }
+          }
+        },
+        {
+          "name": "NTD duyệt đơn → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Trạng thái đổi ngay thành ACCEPTED\", () => pm.expect(pm.response.json().status).to.eql(\"ACCEPTED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/{{appId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{appId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACCEPTED\"\n}"
+            }
+          }
+        },
+        {
+          "name": "SV thấy đơn đã được duyệt → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Đơn hiện ACCEPTED\", () => pm.expect(pm.response.json().find(a => a.id == pm.environment.get(\"appId\")).status).to.eql(\"ACCEPTED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSV}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Duyệt lại đơn đã xử lý → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/{{appId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{appId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REJECTED\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Xóa tin đã có đơn → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Đóng tin → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Tin chuyển sang CLOSED\", () => pm.expect(pm.response.json().status).to.eql(\"CLOSED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}",
+                "close"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ứng tuyển tin đã đóng → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSV}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{jobId}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{jobId}}",
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Tin đã đóng không còn trong tìm kiếm → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Không thấy tin đã đóng\", () => pm.expect(pm.response.json().content.map(j => j.id)).to.not.include(Number(pm.environment.get(\"jobId\"))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs?keyword={{jobTitle}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "{{jobTitle}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Đăng tin tạm để thử xóa → 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 201\", () => pm.response.to.have.status(201));",
+                  "pm.environment.set(\"tmpJobId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tin tạm để thử xóa\",\n  \"description\": \"Pha chế, phục vụ, dọn dẹp. Ưu tiên sinh viên năm 1-2.\",\n  \"category\": \"F&B\",\n  \"location\": \"Bình Thạnh, TP.HCM\",\n  \"salaryMin\": 25000,\n  \"salaryMax\": 30000,\n  \"salaryUnit\": \"HOUR\",\n  \"workTime\": \"18:00–22:00, T2–T6\",\n  \"slots\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Xóa tin chưa có đơn → 204",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenNTD}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{tmpJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{tmpJobId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xem tin đã xóa → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã trả về 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{tmpJobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{tmpJobId}}"
               ]
             }
           }
