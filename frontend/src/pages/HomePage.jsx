@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import { CATEGORIES, LOCATIONS, daysAgo, salaryText } from '../utils/format';
 
 // MH-02 – Trang chủ: banner quảng cáo + tìm kiếm + danh sách việc làm (PB-07, PB-08)
-// Danh sách gọi GET /api/jobs. Khi backend chưa có API thì hiện thông báo thay vì lỗi.
+// Danh sách gọi GET /api/jobs: lọc theo từ khóa, ngành, địa điểm, mức lương; sắp xếp; phân trang.
 
-const CATEGORIES = ['F&B – Nhà hàng', 'Bán hàng', 'Gia sư', 'Nhập liệu', 'Sự kiện – PG', 'Giao hàng'];
-const LOCATIONS = ['Bình Thạnh', 'Gò Vấp', 'Quận 1', 'Quận 3', 'Phú Nhuận', 'Thủ Đức'];
-const UNIT = { HOUR: 'giờ', DAY: 'ngày', MONTH: 'tháng', PROJECT: 'dự án' };
+// Mức lương theo giờ để lọc nhanh (gửi minSalary + salaryUnit=HOUR)
+const SALARY = [['', 'Mọi mức lương'], ['25000', 'Từ 25.000đ/giờ'], ['30000', 'Từ 30.000đ/giờ'], ['35000', 'Từ 35.000đ/giờ']];
+const EMPTY = { keyword: '', category: '', location: '', minSalary: '', sort: 'newest' };
 
 const SLIDES = [
   {
@@ -79,20 +80,6 @@ function HeroVisual({ type }) {
   );
 }
 
-function salaryText(j) {
-  const f = (n) => Number(n).toLocaleString('vi-VN');
-  const unit = UNIT[j.salaryUnit] || '';
-  if (j.salaryMin && j.salaryMax) return `${f(j.salaryMin)} – ${f(j.salaryMax)}đ/${unit}`;
-  if (j.salaryMin) return `Từ ${f(j.salaryMin)}đ/${unit}`;
-  return 'Thỏa thuận';
-}
-
-function daysAgo(iso) {
-  if (!iso) return '';
-  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  return d <= 0 ? 'Đăng hôm nay' : `Đăng ${d} ngày trước`;
-}
-
 function initials(name = '') {
   return name.split(' ').filter(Boolean).slice(-2).map((w) => w[0]).join('').toUpperCase();
 }
@@ -101,8 +88,9 @@ export default function HomePage() {
   const { user } = useAuth();
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [form, setForm] = useState({ keyword: '', category: '', location: '' });
-  const [query, setQuery] = useState({ keyword: '', category: '', location: '', page: 0 });
+  const [form, setForm] = useState(EMPTY);
+  const [query, setQuery] = useState({ ...EMPTY, page: 0 });
+  const [counts, setCounts] = useState({}); // số tin đang tuyển theo ngành (GET /api/jobs/categories)
   const [data, setData] = useState(null);
   const [state, setState] = useState('loading'); // loading | ok | unavailable
 
@@ -116,11 +104,20 @@ export default function HomePage() {
 
   useEffect(() => {
     setState('loading');
+    // Chỉ gửi bộ lọc có giá trị; có mức lương thì lọc theo lương giờ
+    const params = Object.fromEntries(Object.entries({ ...query, size: 10 }).filter(([, v]) => v !== ''));
+    if (params.minSalary) params.salaryUnit = 'HOUR';
     client
-      .get('/api/jobs', { params: { ...query, size: 10 } })
+      .get('/api/jobs', { params })
       .then((res) => { setData(res.data); setState('ok'); })
       .catch(() => setState('unavailable'));
   }, [query]);
+
+  useEffect(() => {
+    client.get('/api/jobs/categories')
+      .then((res) => setCounts(Object.fromEntries(res.data.map((c) => [c.category, c.count]))))
+      .catch(() => {});
+  }, []);
 
   const search = (e) => {
     e?.preventDefault();
@@ -131,8 +128,12 @@ export default function HomePage() {
     setQuery((q) => ({ ...q, category, page: 0 }));
   };
   const clearFilters = () => {
-    setForm({ keyword: '', category: '', location: '' });
-    setQuery({ keyword: '', category: '', location: '', page: 0 });
+    setForm(EMPTY);
+    setQuery({ ...EMPTY, page: 0 });
+  };
+  const changeSort = (sort) => {
+    setForm((f) => ({ ...f, sort }));
+    setQuery((q) => ({ ...q, sort, page: 0 }));
   };
 
   const s = SLIDES[slide];
@@ -151,6 +152,9 @@ export default function HomePage() {
         <select value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}>
           <option value="">Tất cả địa điểm</option>
           {LOCATIONS.map((c) => <option key={c}>{c}</option>)}
+        </select>
+        <select value={form.minSalary} onChange={(e) => setForm({ ...form, minSalary: e.target.value })}>
+          {SALARY.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
         </select>
         <button className="btn blue">Tìm kiếm</button>
       </form>
@@ -205,10 +209,10 @@ export default function HomePage() {
           <button type="button" className="link-btn" onClick={clearFilters}>Xem tất cả</button>
         </div>
         <div className="cats-grid">
-          {CATEGORIES.map((c, i) => (
+          {CATEGORIES.map((c) => (
             <button key={c} type="button" onClick={() => pickCategory(c)}
               className={`cat ${query.category === c ? 'on' : ''}`}>
-              <b>{c}</b><span>{[42, 35, 18, 27, 15, 31][i]} việc đang tuyển</span>
+              <b>{c}</b><span>{counts[c] || 0} việc đang tuyển</span>
             </button>
           ))}
         </div>
@@ -225,9 +229,15 @@ export default function HomePage() {
                   ? <>Tuyển dụng <b>{data.totalElements}</b> việc làm part-time mới nhất</>
                   : 'Việc làm part-time mới nhất'}
               </span>
-              {(query.keyword || query.category || query.location) && (
-                <button type="button" className="link-btn" onClick={clearFilters}>Xóa lọc</button>
-              )}
+              <span className="list-tools">
+                {(query.keyword || query.category || query.location || query.minSalary) && (
+                  <button type="button" className="link-btn" onClick={clearFilters}>Xóa lọc</button>
+                )}
+                <select className="sort" value={query.sort} onChange={(e) => changeSort(e.target.value)} aria-label="Sắp xếp">
+                  <option value="newest">Mới nhất</option>
+                  <option value="salary">Lương cao nhất</option>
+                </select>
+              </span>
             </div>
           </div>
 
@@ -236,7 +246,7 @@ export default function HomePage() {
           {state === 'unavailable' && (
             <div className="card muted-box">
               <b>Danh sách việc làm đang được cập nhật</b>
-              <p>Chức năng tìm việc (GET /api/jobs) sẽ hoàn thành ở Sprint 3.</p>
+              <p>Không kết nối được máy chủ. Kiểm tra backend đã chạy ở cổng 8080 chưa.</p>
             </div>
           )}
 
