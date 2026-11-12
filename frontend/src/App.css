@@ -451,3 +451,47 @@ select { font: inherit; padding: 10px 12px; border: 1px solid #D1D5DB; border-ra
   .detail-action, .row-side { width: 100%; align-items: flex-start; text-align: left; }
   .detail-grid, .facts { grid-template-columns: 1fr; }
 }
+
+/* ===== Nhà tuyển dụng: quản lý tin, form tin, ứng viên ===== */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.stats div { background: #fff; border: 1px solid var(--vien); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; }
+.stats b { font-size: 28px; color: var(--tim-dam); }
+.stats span { font-size: 13px; color: var(--phu); }
+.stats .hot { background: #FFF8DB; border-color: #FBE08A; }
+.emp-job { align-items: center; }
+.emp-job .job-meta { margin-top: 8px; }
+.emp-count { width: 90px; flex: none; display: flex; flex-direction: column; align-items: center; }
+.emp-count b { font-size: 24px; color: var(--tim-dam); line-height: 1; }
+.emp-count span { font-size: 12px; color: var(--phu); }
+.emp-count em { margin-top: 6px; font-style: normal; font-size: 11.5px; font-weight: 700; color: #8A6100; background: #FFF8DB; border-radius: 10px; padding: 2px 8px; white-space: nowrap; }
+.emp-actions { width: 230px; flex: none; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
+.preview-job { padding: 14px; border-style: dashed; }
+.preview-job .job-meta { margin-top: 8px; }
+.tips { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--phu); }
+.tips li { padding-left: 26px; position: relative; }
+.tips li::before { content: ''; position: absolute; left: 0; top: 2px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #D1D5DB; }
+.tips li.ok { color: var(--xanh-la); }
+.tips li.ok::before { background: #10B981; border-color: #10B981; }
+
+.job-strip { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
+.job-strip h1 { font-size: 22px; }
+.slots { width: 180px; flex: none; display: flex; flex-direction: column; gap: 4px; }
+.slots b { font-size: 26px; color: var(--tim-dam); }
+.slots span { font-size: 12.5px; color: var(--phu); }
+.slots i { height: 8px; background: #EEE9F8; border-radius: 6px; overflow: hidden; }
+.slots u { display: block; height: 100%; background: #10B981; text-decoration: none; }
+.applicant .big-av { width: 48px; height: 48px; font-size: 16px; flex: none; }
+.app-name { font-size: 16px; }
+.applicant .chips { margin: 8px 0 2px; }
+.contact { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 13px; color: var(--phu); }
+.contact a { font-weight: 700; }
+.decide { display: flex; gap: 6px; }
+
+@media (max-width: 760px) {
+  .stats { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .emp-actions, .emp-count { width: 100%; justify-content: flex-start; align-items: flex-start; }
+  .job-strip { flex-direction: column; align-items: flex-start; }
+}
