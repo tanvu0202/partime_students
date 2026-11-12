@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 
 // Thông báo nổi góc màn hình, tự ẩn sau 4 giây
@@ -80,4 +81,49 @@ export function PromoBanner({ items }) {
       )}
     </section>
   );
+}
+
+// Hộp thoại dùng chung (thay cho alert/confirm của trình duyệt)
+// Đóng khi bấm nền tối hoặc phím Esc. Vẽ thẳng vào <body> để nền tối phủ kín màn hình.
+export function Modal({ title, children, onClose, footer, wide }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return createPortal(
+    <div className="modal-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className={`modal ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
+        <div className="modal-head">
+          <h2>{title}</h2>
+          <button type="button" className="modal-x" onClick={onClose}>Đóng</button>
+        </div>
+        <div className="modal-body">{children}</div>
+        {footer && <div className="modal-foot">{footer}</div>}
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+// Hộp thoại xác nhận trước thao tác không hoàn tác được (đóng tin, xóa tin, duyệt đơn)
+export function Confirm({ title, text, okText = 'Đồng ý', danger, busy, onOk, onClose }) {
+  return (
+    <Modal title={title} onClose={onClose} footer={(
+      <>
+        <button type="button" className="btn link" onClick={onClose}>Hủy</button>
+        <button type="button" className={`btn ${danger ? 'danger' : 'primary'}`} disabled={busy} onClick={onOk}>
+          {busy ? 'Đang xử lý...' : okText}
+        </button>
+      </>
+    )}>
+      <p className="modal-text">{text}</p>
+    </Modal>
+  );
+}
+
+// Nhãn trạng thái có màu: map = JOB_STATUS hoặc APP_STATUS trong utils/format.js
+export function StatusBadge({ map, value }) {
+  const [text, cls] = map[value] || [value, ''];
+  return <span className={`badge ${cls}`}>{text}</span>;
 }
