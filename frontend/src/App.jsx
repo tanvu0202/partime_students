@@ -10,6 +10,9 @@ import PlaceholderPage from './pages/PlaceholderPage';
 import HomePage from './pages/HomePage';
 import JobDetailPage from './pages/JobDetailPage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
+import EmployerJobsPage from './pages/EmployerJobsPage';
+import JobFormPage from './pages/JobFormPage';
+import ApplicantsPage from './pages/ApplicantsPage';
 import './App.css';
 
 const SV = ['STUDENT'];
@@ -31,7 +34,10 @@ export default function App() {
             <Route path="/student/applications" element={<ProtectedRoute roles={SV}><MyApplicationsPage /></ProtectedRoute>} />
 
             <Route path="/employer/profile" element={<ProtectedRoute roles={NTD}><EmployerProfilePage /></ProtectedRoute>} />
-            <Route path="/employer/jobs" element={<ProtectedRoute roles={NTD}><PlaceholderPage title="Tin của tôi" sprint="Sprint 3" /></ProtectedRoute>} />
+            <Route path="/employer/jobs" element={<ProtectedRoute roles={NTD}><EmployerJobsPage /></ProtectedRoute>} />
+            <Route path="/employer/jobs/new" element={<ProtectedRoute roles={NTD}><JobFormPage /></ProtectedRoute>} />
+            <Route path="/employer/jobs/:id/edit" element={<ProtectedRoute roles={NTD}><JobFormPage /></ProtectedRoute>} />
+            <Route path="/employer/jobs/:id/applicants" element={<ProtectedRoute roles={NTD}><ApplicantsPage /></ProtectedRoute>} />
 
             <Route path="/admin" element={<ProtectedRoute roles={AD}><PlaceholderPage title="Quản trị" sprint="Sprint 4" /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />

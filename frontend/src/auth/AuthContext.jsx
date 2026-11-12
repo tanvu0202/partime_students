@@ -40,7 +40,7 @@ export const useAuth = () => useContext(AuthContext);
 
 // Trang chủ của từng vai trò
 export function homeOf(role) {
-  if (role === 'EMPLOYER') return '/employer/profile';
+  if (role === 'EMPLOYER') return '/employer/jobs';
   if (role === 'ADMIN') return '/admin';
   return '/student/profile';
 }
