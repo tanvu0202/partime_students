@@ -4,7 +4,7 @@ import client from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 
 // MH-02 – Trang chủ: banner quảng cáo + tìm kiếm + danh sách việc làm (PB-07, PB-08)
-// Danh sách gọi GET /api/jobs (làm ở Buổi 7). Khi backend chưa có API thì hiện thông báo thay vì lỗi.
+// Danh sách gọi GET /api/jobs. Khi backend chưa có API thì hiện thông báo thay vì lỗi.
 
 const CATEGORIES = ['F&B – Nhà hàng', 'Bán hàng', 'Gia sư', 'Nhập liệu', 'Sự kiện – PG', 'Giao hàng'];
 const LOCATIONS = ['Bình Thạnh', 'Gò Vấp', 'Quận 1', 'Quận 3', 'Phú Nhuận', 'Thủ Đức'];
@@ -236,7 +236,7 @@ export default function HomePage() {
           {state === 'unavailable' && (
             <div className="card muted-box">
               <b>Danh sách việc làm đang được cập nhật</b>
-              <p>Chức năng tìm việc (GET /api/jobs) sẽ hoàn thành ở Sprint 3 – Buổi 7.</p>
+              <p>Chức năng tìm việc (GET /api/jobs) sẽ hoàn thành ở Sprint 3.</p>
             </div>
           )}
 
