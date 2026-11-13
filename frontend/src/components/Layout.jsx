@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import Footer from './Footer';
 
 const MENU = {
   STUDENT: [['Việc làm', '/'], ['Đơn của tôi', '/student/applications'], ['Hồ sơ', '/student/profile']],
@@ -51,10 +52,7 @@ export default function Layout() {
       <main className={pathname === '/' ? 'page wide' : 'page'} key={pathname}>
         <Outlet />
       </main>
-      <footer className="foot">
-        <span><b>PartTime<span>SV</span></b> – Đồ án Chuyên đề tốt nghiệp 2, nhóm GR7, Trường ĐH Văn Lang</span>
-        <span>Về chúng tôi · Điều khoản sử dụng · Hỗ trợ</span>
-      </footer>
+      <Footer />
     </>
   );
 }
