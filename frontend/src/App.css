@@ -171,8 +171,16 @@ input[type=file] { max-width: 100%; }
 /* ===== Chân trang ===== */
 #root { min-height: 100vh; display: flex; flex-direction: column; }
 #root > .page { flex: 1; width: 100%; }
-.foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 18px 32px; background: #3B1E6E; color: #D9CCF5; font-size: 13px; }
-.foot b { color: #fff; } .foot b span { color: #FFD43B; }
+.foot { margin-top: 48px; background: var(--tim-dam); color: #D9CCF5; font-size: 14px; }
+.foot-inner { max-width: 1040px; margin: 0 auto; padding: 40px 16px 28px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
+.foot-logo { font-size: 22px; font-weight: 800; color: #fff; text-decoration: none; }
+.foot-logo span { color: var(--vang); }
+.foot-brand p { margin-top: 10px; line-height: 1.6; max-width: 300px; }
+.foot-col { display: flex; flex-direction: column; gap: 9px; }
+.foot-col h4 { color: var(--vang); font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+.foot-col a, .foot-col span { color: #D9CCF5; text-decoration: none; }
+.foot-col a:hover { color: #fff; text-decoration: underline; }
+.foot-bottom { max-width: 1040px; margin: 0 auto; padding: 16px; border-top: 1px solid rgba(255,255,255,.14); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; color: #B9A8E0; }
 
 /* ===== Trang chủ MH-02 ===== */
 .page.wide { max-width: 1180px; margin-top: 20px; }
@@ -382,7 +390,8 @@ select { font: inherit; padding: 10px 12px; border: 1px solid #D1D5DB; border-ra
   .job-logo { width: 44px; height: 44px; font-size: 15px; }
   .job-side { flex-direction: row; width: 100%; align-items: center; }
   .inline-ad, .employer-cta { flex-direction: column; align-items: flex-start; }
-  .foot { padding: 16px; }
+  .foot-inner { grid-template-columns: 1fr 1fr; gap: 24px; padding: 32px 16px 20px; }
+  .foot-brand { grid-column: 1 / -1; }
 }
 
 /* ===== Tin tuyển dụng, ứng tuyển ===== */
