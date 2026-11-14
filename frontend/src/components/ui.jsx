@@ -30,14 +30,15 @@ export function PasswordInput(props) {
 }
 
 // Khung bên trái của trang Đăng nhập / Đăng ký
-export function AuthAside({ title, text, children }) {
+// Cột trái trang đăng nhập / đăng ký: tiêu đề, mô tả và ảnh minh họa phía dưới
+export function AuthAside({ title, text, image, children }) {
   return (
     <aside className="auth-side">
       <span className="auth-side-tag">PartTimeSV</span>
       <h2>{title}</h2>
       <p>{text}</p>
       {children}
-      <div className="auth-side-deco" />
+      {image && <img className="auth-art" src={image} alt="Sinh viên tìm việc làm thêm gần trường" />}
     </aside>
   );
 }

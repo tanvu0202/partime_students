@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 // Mục nào để trống ('') sẽ tự ẩn, điền sau khi có thông tin.
 const CONTACT = {
   facebook: 'https://www.facebook.com/tan.vu.698079',
-  email: 'nhom7@gmail.com',
-  phone: '0123 456 789', // số minh họa, thay bằng số thật của nhóm
-  address: '69/68 Đặng Thùy Trâm, P. Bình Lợi Trung, TP. Hồ Chí Minh',
+  email: 'Email: nhom7@gmail.com',
+  phone: 'SĐT: 0123 456 789', // số minh họa, thay bằng số thật của nhóm
+  address: 'Địa chỉ: 69/68 Đặng Thùy Trâm, P. Bình Lợi Trung, TP. Hồ Chí Minh',
 };
 
 const COLUMNS = [

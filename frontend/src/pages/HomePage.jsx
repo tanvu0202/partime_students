@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { CATEGORIES, LOCATIONS, daysAgo, salaryText } from '../utils/format';
+import imgWeekend from '../assets/banner-cuoi-tuan.svg';
+import imgTet from '../assets/banner-tet.svg';
+import imgEmployer from '../assets/banner-nha-tuyen-dung.svg';
 
 // MH-02 – Trang chủ: banner quảng cáo + tìm kiếm + danh sách việc làm (PB-07, PB-08)
 // Danh sách gọi GET /api/jobs: lọc theo từ khóa, ngành, địa điểm, mức lương; sắp xếp; phân trang.
@@ -10,75 +13,36 @@ import { CATEGORIES, LOCATIONS, daysAgo, salaryText } from '../utils/format';
 // Mức lương theo giờ để lọc nhanh (gửi minSalary + salaryUnit=HOUR)
 const SALARY = [['', 'Mọi mức lương'], ['25000', 'Từ 25.000đ/giờ'], ['30000', 'Từ 30.000đ/giờ'], ['35000', 'Từ 35.000đ/giờ']];
 const EMPTY = { keyword: '', category: '', location: '', minSalary: '', sort: 'newest' };
+const FILTER_KEYS = ['keyword', 'category', 'location', 'minSalary'];
+
+// Nhãn hiển thị cho từng bộ lọc đang áp dụng
+function filterLabel(key, value) {
+  if (key === 'keyword') return `Từ khóa: "${value}"`;
+  if (key === 'category') return `Ngành: ${value}`;
+  if (key === 'location') return `Địa điểm: ${value}`;
+  return SALARY.find(([v]) => v === value)?.[1] || value;
+}
 
 const SLIDES = [
   {
     tag: 'Việc cuối tuần',
     title: 'Làm thêm thứ Bảy, Chủ nhật – nhận lương ngay cuối ngày',
     text: 'Hơn 120 ca làm cuối tuần gần trường: hỗ trợ sự kiện, phát tờ rơi, phục vụ tiệc.',
-    cta: 'Xem việc cuối tuần', category: 'Sự kiện – PG', theme: 'violet', visual: 'weekend',
+    cta: 'Xem việc cuối tuần', category: 'Sự kiện – PG', theme: 'violet', image: imgWeekend,
   },
   {
     tag: 'Tuyển gấp mùa Tết',
     title: 'Cuối năm cửa hàng cần người – hơn 500 vị trí đang chờ bạn',
     text: 'Bán hàng, đóng gói, giao hàng nội thành. Ca linh hoạt, xếp theo lịch học.',
-    cta: 'Xem việc bán hàng', category: 'Bán hàng', theme: 'yellow', visual: 'urgent',
+    cta: 'Xem việc bán hàng', category: 'Bán hàng', theme: 'yellow', image: imgTet,
   },
   {
     tag: 'Dành cho nhà tuyển dụng',
     title: 'Đăng tin miễn phí, nhận hồ sơ sinh viên ngay trong ngày',
     text: 'Theo dõi lượt xem, duyệt đơn và đánh giá hai chiều trên cùng một trang.',
-    cta: 'Đăng ký nhà tuyển dụng', to: '/register', theme: 'blue', visual: 'employer',
+    cta: 'Đăng ký nhà tuyển dụng', to: '/register', theme: 'blue', image: imgEmployer,
   },
 ];
-
-// Phần hình minh họa bên phải banner – dựng bằng HTML/CSS, không dùng ảnh hay icon
-function HeroVisual({ type }) {
-  if (type === 'weekend') {
-    return (
-      <div className="hv hv-weekend">
-        <div className="hv-week">
-          {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((d) => (
-            <span key={d} className={d === 'T7' || d === 'CN' ? 'on' : ''}>{d}</span>
-          ))}
-        </div>
-        <div className="hv-ticket">
-          <span className="hv-ticket-tag">Ca sáng thứ Bảy</span>
-          <b>Hỗ trợ sự kiện ra mắt sản phẩm</b>
-          <span className="hv-ticket-info">Quận 1 · 7:30 – 12:00</span>
-          <div className="hv-ticket-foot"><b>200.000đ</b><span>/ ca</span><em>Nhận lương cuối ngày</em></div>
-        </div>
-        <div className="hv-pill">86 sinh viên đã ứng tuyển tuần này</div>
-      </div>
-    );
-  }
-  if (type === 'urgent') {
-    return (
-      <div className="hv hv-urgent">
-        <div className="hv-water">TẾT</div>
-        {[['Bán hàng shop thời trang', 'Quận 3', 8], ['Đóng gói đơn hàng Tết', 'Thủ Đức', 12], ['Giao hàng nội thành', 'Gò Vấp', 20]].map(([t, l, n], i) => (
-          <div key={t} className="hv-row" style={{ marginLeft: i * 22 }}>
-            <span className="hv-hot">Gấp</span>
-            <div><b>{t}</b><span>{l} · cần {n} người</span></div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return (
-    <div className="hv hv-employer">
-      <div className="hv-dash">
-        <div className="hv-dash-head"><span>Tin của bạn</span><b>Phục vụ ca tối</b></div>
-        <div className="hv-dash-num"><b>12</b><span>hồ sơ mới<br />hôm nay</span></div>
-        <div className="hv-bars">
-          {[30, 45, 38, 60, 52, 78, 92].map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}
-        </div>
-        <div className="hv-dash-foot">Lượt xem 7 ngày qua</div>
-      </div>
-      <div className="hv-pill hv-pill-yellow">Phí đăng tin: 0đ</div>
-    </div>
-  );
-}
 
 function initials(name = '') {
   return name.split(' ').filter(Boolean).slice(-2).map((w) => w[0]).join('').toUpperCase();
@@ -93,6 +57,10 @@ export default function HomePage() {
   const [counts, setCounts] = useState({}); // số tin đang tuyển theo ngành (GET /api/jobs/categories)
   const [data, setData] = useState(null);
   const [state, setState] = useState('loading'); // loading | ok | unavailable
+  const listRef = useRef(null);
+  const scrollNext = useRef(false); // bấm Tìm kiếm / chọn ngành -> cuộn xuống kết quả khi tải xong
+
+  const active = FILTER_KEYS.filter((k) => query[k] !== '');
 
   // Banner tự chuyển sau 6 giây, dừng khi rê chuột vào
   useEffect(() => {
@@ -109,7 +77,14 @@ export default function HomePage() {
     if (params.minSalary) params.salaryUnit = 'HOUR';
     client
       .get('/api/jobs', { params })
-      .then((res) => { setData(res.data); setState('ok'); })
+      .then((res) => {
+        setData(res.data);
+        setState('ok');
+        if (scrollNext.current) {
+          scrollNext.current = false;
+          listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      })
       .catch(() => setState('unavailable'));
   }, [query]);
 
@@ -121,11 +96,18 @@ export default function HomePage() {
 
   const search = (e) => {
     e?.preventDefault();
+    scrollNext.current = true;
     setQuery({ ...form, page: 0 });
   };
   const pickCategory = (category) => {
+    scrollNext.current = true;
     setForm((f) => ({ ...f, category }));
     setQuery((q) => ({ ...q, category, page: 0 }));
+  };
+  // Bỏ một bộ lọc đang áp dụng
+  const removeFilter = (key) => {
+    setForm((f) => ({ ...f, [key]: '' }));
+    setQuery((q) => ({ ...q, [key]: '', page: 0 }));
   };
   const clearFilters = () => {
     setForm(EMPTY);
@@ -143,17 +125,17 @@ export default function HomePage() {
     <div className="home">
       {/* Thanh tìm kiếm */}
       <form className="search-band" onSubmit={search}>
-        <input placeholder="Tìm việc part-time: phục vụ, gia sư, bán hàng..." value={form.keyword}
+        <input className={query.keyword ? 'set' : ''} placeholder="Tìm việc part-time: phục vụ, gia sư, bán hàng..." value={form.keyword}
           onChange={(e) => setForm({ ...form, keyword: e.target.value })} />
-        <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+        <select className={query.category ? 'set' : ''} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
           <option value="">Tất cả ngành nghề</option>
           {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
         </select>
-        <select value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}>
+        <select className={query.location ? 'set' : ''} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}>
           <option value="">Tất cả địa điểm</option>
           {LOCATIONS.map((c) => <option key={c}>{c}</option>)}
         </select>
-        <select value={form.minSalary} onChange={(e) => setForm({ ...form, minSalary: e.target.value })}>
+        <select className={query.minSalary ? 'set' : ''} value={form.minSalary} onChange={(e) => setForm({ ...form, minSalary: e.target.value })}>
           {SALARY.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
         </select>
         <button className="btn blue">Tìm kiếm</button>
@@ -163,7 +145,8 @@ export default function HomePage() {
       <section className="promo">
         <div className={`hero hero-${s.theme} ${paused ? 'paused' : ''}`}
           onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-          <div className="hero-deco" />
+          {/* Ảnh minh họa làm nền banner, chữ đặt đè ở bên trái */}
+          <img className="hero-img" key={`i${slide}`} src={s.image} alt="" />
           <div className="hero-text" key={`t${slide}`}>
             <span className="hero-tag">{s.tag}</span>
             <h2>{s.title}</h2>
@@ -172,7 +155,6 @@ export default function HomePage() {
               ? <Link to={s.to} className="btn hero-cta">{s.cta}</Link>
               : <button type="button" className="btn hero-cta" onClick={() => pickCategory(s.category)}>{s.cta}</button>}
           </div>
-          <div className="hero-visual" key={`v${slide}`}><HeroVisual type={s.visual} /></div>
 
           <div className="hero-ctrl">
             <div className="hero-dots">
@@ -220,25 +202,37 @@ export default function HomePage() {
 
       {/* Danh sách việc + cột phải */}
       <section className="main-cols">
-        <div className="job-col">
-          <div className="card list-head">
+        <div className="job-col" ref={listRef}>
+          <div className={`card list-head ${active.length ? 'filtered' : ''}`}>
             <div className="crumb">Trang chủ / Việc làm part-time{query.category && ` / ${query.category}`}</div>
             <div className="list-title">
               <span>
-                {state === 'ok'
-                  ? <>Tuyển dụng <b>{data.totalElements}</b> việc làm part-time mới nhất</>
-                  : 'Việc làm part-time mới nhất'}
+                {state !== 'ok' && 'Việc làm part-time mới nhất'}
+                {state === 'ok' && (active.length
+                  ? <>Tìm thấy <b>{data.totalElements}</b> việc phù hợp với bộ lọc</>
+                  : <>Tuyển dụng <b>{data.totalElements}</b> việc làm part-time mới nhất</>)}
               </span>
               <span className="list-tools">
-                {(query.keyword || query.category || query.location || query.minSalary) && (
-                  <button type="button" className="link-btn" onClick={clearFilters}>Xóa lọc</button>
-                )}
                 <select className="sort" value={query.sort} onChange={(e) => changeSort(e.target.value)} aria-label="Sắp xếp">
                   <option value="newest">Mới nhất</option>
                   <option value="salary">Lương cao nhất</option>
                 </select>
               </span>
             </div>
+
+            {/* Trạng thái lọc: hiện các bộ lọc đang áp dụng, bấm Bỏ để gỡ từng cái */}
+            {active.length > 0 && (
+              <div className="filter-bar">
+                <span className="filter-label">Đang lọc theo</span>
+                {active.map((k) => (
+                  <span key={k} className="filter-chip">
+                    {filterLabel(k, query[k])}
+                    <button type="button" onClick={() => removeFilter(k)} aria-label={`Bỏ ${filterLabel(k, query[k])}`}>Bỏ</button>
+                  </span>
+                ))}
+                <button type="button" className="link-btn" onClick={clearFilters}>Xóa tất cả bộ lọc</button>
+              </div>
+            )}
           </div>
 
           {state === 'loading' && <div className="card muted-box">Đang tải danh sách việc làm...</div>}

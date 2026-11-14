@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { homeOf, useAuth } from '../auth/AuthContext';
 import { errorMessage } from '../api/client';
 import { AuthAside, PasswordInput } from '../components/ui';
+import loginArt from '../assets/dang-nhap.svg';
 
 // MH-01 – Đăng nhập (B6-08)
 export default function LoginPage() {
@@ -25,7 +26,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const user = await login(form.email, form.password);
-      navigate(homeOf(user.role));
+      // Đang ở trang khác thì bị chuyển sang đăng nhập -> quay lại trang đó; còn lại vào trang đầu của vai trò
+      navigate(location.state?.from || homeOf(user.role), { replace: true });
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -35,14 +37,8 @@ export default function LoginPage() {
 
   return (
     <div className="auth-wrap">
-      <AuthAside title="Việc làm thêm vừa sức, khớp với lịch học của bạn"
-        text="Hàng trăm ca làm part-time gần trường, đánh giá minh bạch từ chính sinh viên đã làm.">
-        <ol className="steps">
-          <li><b>Tạo hồ sơ</b><span>Thêm kỹ năng và CV một lần, dùng cho mọi đơn.</span></li>
-          <li><b>Ứng tuyển</b><span>Lọc theo ngành, khu vực, mức lương rồi nộp đơn.</span></li>
-          <li><b>Nhận việc và đánh giá</b><span>Làm xong, hai bên chấm điểm cho nhau.</span></li>
-        </ol>
-      </AuthAside>
+      <AuthAside image={loginArt} title="Việc làm thêm vừa sức, khớp với lịch học của bạn"
+        text="Hàng trăm ca làm part-time gần trường, đánh giá minh bạch từ chính sinh viên đã làm." />
 
       <div className="auth-box">
         <h1>Chào mừng trở lại</h1>

@@ -67,7 +67,7 @@ export default function JobDetailPage() {
 
   let action;
   if (!user) {
-    action = <button type="button" className="btn primary big full" onClick={() => navigate('/login')}>Đăng nhập để ứng tuyển</button>;
+    action = <button type="button" className="btn primary big full" onClick={() => navigate('/login', { state: { from: `/jobs/${id}` } })}>Đăng nhập để ứng tuyển</button>;
   } else if (isStudent && myApp) {
     action = (
       <div className="applied">
@@ -124,10 +124,18 @@ export default function JobDetailPage() {
               <div><b>{job.companyName}</b><span>{job.companyAddress || 'Chưa cập nhật địa chỉ'}</span></div>
             </div>
             {job.companyDescription && <p className="preview-text">{job.companyDescription}</p>}
-            <div className="preview-contact">
-              {job.contactEmail && <span>{job.contactEmail}</span>}
-              {job.contactPhone && <span>{job.contactPhone}</span>}
-            </div>
+            {/* Khách chưa đăng nhập không thấy email, số điện thoại (backend cũng không trả về) */}
+            {user ? (
+              <div className="preview-contact">
+                {job.contactEmail && <span>{job.contactEmail}</span>}
+                {job.contactPhone && <span>{job.contactPhone}</span>}
+              </div>
+            ) : (
+              <div className="contact-locked">
+                <span>Email và số điện thoại liên hệ chỉ hiện khi bạn đã đăng nhập.</span>
+                <Link to="/login" state={{ from: `/jobs/${id}` }}>Đăng nhập để xem</Link>
+              </div>
+            )}
           </div>
           <div className="card dark-card">
             <span>Mẹo ứng tuyển</span>
