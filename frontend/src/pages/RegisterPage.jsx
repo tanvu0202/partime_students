@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import client, { errorMessage, fieldErrors } from '../api/client';
 import { AuthAside, PasswordInput } from '../components/ui';
+import loginArt from '../assets/dang-nhap.svg';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -76,7 +77,7 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-wrap">
-      <AuthAside title={b.title} text={b.text}>
+      <AuthAside image={loginArt} title={b.title} text={b.text}>
         <ul className="benefits" key={form.role}>
           {b.items.map((x) => <li key={x}>{x}</li>)}
         </ul>

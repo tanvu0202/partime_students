@@ -38,9 +38,9 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => useContext(AuthContext);
 
-// Trang chủ của từng vai trò
+// Trang đầu tiên sau khi đăng nhập: sinh viên vào trang chủ tìm việc, không đưa thẳng vào hồ sơ
 export function homeOf(role) {
   if (role === 'EMPLOYER') return '/employer/jobs';
   if (role === 'ADMIN') return '/admin';
-  return '/student/profile';
+  return '/';
 }
