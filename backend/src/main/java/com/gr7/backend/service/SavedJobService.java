@@ -3,6 +3,7 @@ package com.gr7.backend.service;
 import com.gr7.backend.dto.PageResponse;
 import com.gr7.backend.dto.SavedJobResponse;
 import com.gr7.backend.entity.JobPost;
+import com.gr7.backend.entity.JobStatus;
 import com.gr7.backend.entity.SavedJob;
 import com.gr7.backend.entity.StudentProfile;
 import com.gr7.backend.exception.ApiException;
@@ -45,7 +46,8 @@ public class SavedJobService {
     public void save(Long userId, Long jobId) {
         StudentProfile s = student(userId);
         JobPost j = jobs.findById(jobId)
-                .filter(x -> !x.isHidden())
+                // Tin chờ duyệt hoặc bị từ chối chưa công khai nên sinh viên không lưu được (TC-DX-03)
+                .filter(x -> !x.isHidden() && x.getStatus() != JobStatus.PENDING && x.getStatus() != JobStatus.REJECTED)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy tin tuyển dụng"));
         if (saved.existsByStudentIdAndJobId(s.getId(), jobId)) {
             return;

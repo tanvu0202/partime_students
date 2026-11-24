@@ -1,6 +1,7 @@
 package com.gr7.backend.controller;
 
 import com.gr7.backend.dto.AuthResponse;
+import com.gr7.backend.dto.FacebookLoginRequest;
 import com.gr7.backend.dto.ForgotPasswordRequest;
 import com.gr7.backend.dto.GoogleLoginRequest;
 import com.gr7.backend.dto.LoginRequest;
@@ -10,6 +11,7 @@ import com.gr7.backend.dto.ResetPasswordRequest;
 import com.gr7.backend.dto.SocialCompleteRequest;
 import com.gr7.backend.dto.UserResponse;
 import com.gr7.backend.security.CurrentUser;
+import com.gr7.backend.security.FacebookTokenVerifier;
 import com.gr7.backend.security.GoogleTokenVerifier;
 import com.gr7.backend.service.AuthService;
 import com.gr7.backend.service.PasswordResetService;
@@ -28,13 +30,15 @@ public class AuthController {
     private final AuthService authService;
     private final SocialAuthService socialAuth;
     private final GoogleTokenVerifier google;
+    private final FacebookTokenVerifier facebook;
     private final PasswordResetService passwordReset;
 
     public AuthController(AuthService authService, SocialAuthService socialAuth, GoogleTokenVerifier google,
-                          PasswordResetService passwordReset) {
+                          FacebookTokenVerifier facebook, PasswordResetService passwordReset) {
         this.authService = authService;
         this.socialAuth = socialAuth;
         this.google = google;
+        this.facebook = facebook;
         this.passwordReset = passwordReset;
     }
 
@@ -61,6 +65,15 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<?> google(@Valid @RequestBody GoogleLoginRequest req) {
         return social(socialAuth.login(google.verify(req.idToken())));
+    }
+
+    /**
+     * PB-18: giống /google. 200 + token; 202 + signupToken (lần đầu, Facebook không trả email thì email = null
+     * và MH-13 bắt nhập email); 401 token sai hoặc của ứng dụng khác; 403 bị khóa; 503 chưa cấu hình App ID.
+     */
+    @PostMapping("/facebook")
+    public ResponseEntity<?> facebook(@Valid @RequestBody FacebookLoginRequest req) {
+        return social(socialAuth.login(facebook.verify(req.accessToken())));
     }
 
     /** MH-13: chọn vai trò lần đầu. 201 + token; 400 signupToken hết hạn; 409 email đã dùng. */

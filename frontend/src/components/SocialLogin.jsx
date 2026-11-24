@@ -6,8 +6,12 @@ import { loadScript } from '../utils/loadScript';
 
 // Client ID loại "Web application" ở Google Cloud Console, đặt trong frontend/.env: VITE_GOOGLE_CLIENT_ID=...
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+// App ID của ứng dụng Facebook (developers.facebook.com), đặt trong frontend/.env: VITE_FACEBOOK_APP_ID=...
+const FACEBOOK_APP_ID = import.meta.env.VITE_FACEBOOK_APP_ID || '';
+const FACEBOOK_SDK = 'https://connect.facebook.net/vi_VN/sdk.js';
+const FACEBOOK_VERSION = 'v26.0';
 
-// Đăng nhập bằng mạng xã hội (PB-17): 200 -> vào trang theo vai trò; 202 -> MH-13 Chọn vai trò
+// Đăng nhập bằng mạng xã hội (PB-17 Google, PB-18 Facebook): 200 -> vào trang theo vai trò; 202 -> MH-13 Chọn vai trò
 export function SocialLogin({ onError, from }) {
   const { signIn } = useAuth();
   const navigate = useNavigate();
@@ -35,6 +39,7 @@ export function SocialLogin({ onError, from }) {
     <div className="social">
       <div className="or-line"><span>hoặc</span></div>
       <GoogleButton busy={busy} onToken={(idToken) => send('/api/auth/google', { idToken })} />
+      <FacebookButton busy={busy} onError={onError} onToken={(accessToken) => send('/api/auth/facebook', { accessToken })} />
     </div>
   );
 }
@@ -84,6 +89,51 @@ function GoogleButton({ busy, onToken }) {
         <span>{busy ? 'Đang xử lý...' : 'Tiếp tục với Google'}</span>
       </button>
       {GOOGLE_CLIENT_ID && <div className={`social-overlay ${ready ? 'ready' : ''}`} ref={box} />}
+    </div>
+  );
+}
+// Nút "Tiếp tục với Facebook": tải Facebook SDK sẵn khi mở trang (FB.login phải gọi ngay trong lúc bấm,
+// nếu chờ tải SDK thì trình duyệt chặn cửa sổ đăng nhập), lấy access token rồi gửi cho backend kiểm tra.
+function FacebookButton({ busy, onToken, onError }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!FACEBOOK_APP_ID) return undefined;
+    let alive = true;
+    loadScript(FACEBOOK_SDK)
+      .then(() => {
+        if (!alive || !window.FB) return;
+        window.FB.init({ appId: FACEBOOK_APP_ID, cookie: false, xfbml: false, version: FACEBOOK_VERSION });
+        setReady(true);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  const login = () => {
+    if (!window.FB) return;
+    window.FB.login((res) => {
+      if (res.authResponse?.accessToken) onToken(res.authResponse.accessToken);
+      else onError('Bạn đã hủy đăng nhập Facebook');
+    }, { scope: 'public_profile,email' });
+  };
+
+  return (
+    <div className="social-btn">
+      <button
+        type="button"
+        className="btn ghost full"
+        disabled={!FACEBOOK_APP_ID || !ready || busy}
+        title={FACEBOOK_APP_ID ? '' : 'Chưa cấu hình VITE_FACEBOOK_APP_ID'}
+        onClick={login}
+        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style={{ flexShrink: 0 }}>
+          <path fill="#1877F2" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z" />
+          <path fill="#FFFFFF" d="M16.67 15.56l.53-3.5h-3.32V9.8c0-.96.46-1.89 1.96-1.89h1.5V4.94s-1.37-.24-2.68-.24c-2.74 0-4.54 1.68-4.54 4.7v2.66H7.08v3.5h3.04V24c.61.1 1.24.14 1.88.14s1.27-.05 1.88-.14v-8.44h2.79z" />
+        </svg>
+        <span>{busy ? 'Đang xử lý...' : 'Tiếp tục với Facebook'}</span>
+      </button>
     </div>
   );
 }

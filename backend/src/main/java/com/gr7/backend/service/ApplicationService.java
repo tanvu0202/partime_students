@@ -26,13 +26,16 @@ public class ApplicationService {
     private final JobPostRepository jobs;
     private final StudentProfileRepository students;
     private final NotificationService notifications;
+    private final ApplicationMailService mails;
 
     public ApplicationService(ApplicationRepository applications, JobPostRepository jobs,
-                              StudentProfileRepository students, NotificationService notifications) {
+                              StudentProfileRepository students, NotificationService notifications,
+                              ApplicationMailService mails) {
         this.applications = applications;
         this.jobs = jobs;
         this.students = students;
         this.notifications = notifications;
+        this.mails = mails;
     }
 
     /**
@@ -64,6 +67,7 @@ public class ApplicationService {
             notifications.create(j.getEmployer().getUser(), NotificationType.NEW_APPLICATION,
                     s.getUser().getFullName() + " vừa ứng tuyển tin " + NotificationService.quote(j.getTitle()),
                     "/employer/jobs/" + j.getId() + "/applicants");
+            mails.newApplicant(saved);   // PB-22: email nếu nhà tuyển dụng bật nhận email
             return MyApplicationResponse.from(saved);
         } catch (DataIntegrityViolationException e) {
             // Hai yêu cầu gửi cùng lúc: khóa UNIQUE(job_id, student_id) trong CSDL chặn lại

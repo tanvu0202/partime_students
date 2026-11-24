@@ -33,6 +33,11 @@ public class User {
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
+    /** Nhận email khi trạng thái đơn ứng tuyển thay đổi (FR-25), mặc định bật. */
+    // columnDefinition: CSDL cloud dùng ddl-auto=update, thiếu DEFAULT thì tài khoản cũ bị đặt FALSE
+    @Column(name = "email_notify", nullable = false, columnDefinition = "BOOLEAN NOT NULL DEFAULT TRUE")
+    private boolean emailNotify = true;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -58,6 +63,8 @@ public class User {
     public void setPhone(String phone) { this.phone = phone; }
     public UserStatus getStatus() { return status; }
     public void setStatus(UserStatus status) { this.status = status; }
+    public boolean isEmailNotify() { return emailNotify; }
+    public void setEmailNotify(boolean emailNotify) { this.emailNotify = emailNotify; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

@@ -1,8 +1,17 @@
-# Copy file này thành application.properties (cùng thư mục) rồi điền thông tin Gmail gửi thư.
+# Copy file này thành application.properties (cùng thư mục) rồi điền thông tin bí mật của máy mình.
 # File application.properties đã bị .gitignore chặn, không bị commit.
-# Bỏ trống thì email chỉ in ra terminal, web vẫn chạy bình thường.
+# Bỏ trống phần nào thì chức năng đó tắt, web vẫn chạy bình thường.
+
+# ---------- Gửi email (quên mật khẩu, email trạng thái đơn) ----------
+# Bỏ trống thì email chỉ in ra terminal.
 #spring.mail.host=smtp.gmail.com
 #spring.mail.port=587
 #spring.mail.username=gmail_gui@gmail.com
 #spring.mail.password=mat_khau_ung_dung_16_ky_tu
 #app.mail.from=PartTimeSV <gmail_gui@gmail.com>
+
+# ---------- Đăng nhập Facebook ----------
+# Lấy ở developers.facebook.com > ứng dụng của nhóm > Cài đặt ứng dụng > Thông tin cơ bản.
+# App ID cũng phải đặt ở frontend/.env (VITE_FACEBOOK_APP_ID). Bỏ trống thì nút Facebook bị tắt.
+#app.facebook.app-id=123456789012345
+#app.facebook.app-secret=chuoi_bi_mat_cua_ung_dung

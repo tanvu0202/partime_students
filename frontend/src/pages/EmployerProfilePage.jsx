@@ -5,6 +5,7 @@ import { initials } from '../components/Layout';
 import { Progress, PromoBanner, Toast } from '../components/ui';
 import { AreaSelect } from '../components/AreaSelect';
 import { joinArea, splitAddress } from '../utils/areas';
+import EmailSettingCard from '../components/EmailSettingCard';
 
 const BANNERS = [
   { tag: 'Mẹo tuyển dụng', title: 'Tin ghi rõ ca làm và mức lương nhận nhiều đơn hơn', text: 'Sinh viên lọc theo ca và lương, tin thiếu thông tin sẽ khó được tìm thấy.', big: '3x', bigNote: 'lượt ứng tuyển', cta: 'Xem tin của tôi', to: '/employer/jobs', theme: 'yellow' },
@@ -119,6 +120,7 @@ export default function EmployerProfilePage() {
         </form>
 
         <aside className="side-col">
+          <EmailSettingCard role="EMPLOYER" onMessage={(text, type) => setToast({ text, type })} />
           <div className="card">
             <h2>Sinh viên sẽ thấy</h2>
             <div className="preview">

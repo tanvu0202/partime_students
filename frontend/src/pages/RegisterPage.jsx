@@ -85,17 +85,17 @@ export default function RegisterPage() {
               </button>
             ))}
           </div>
-          <Field label={form.role === 'EMPLOYER' ? 'Họ tên người liên hệ' : 'Họ tên'} name="fullName"
+          <Field label={form.role === 'EMPLOYER' ? 'Họ tên người liên hệ *' : 'Họ tên *'} name="fullName"
             form={form} errors={errors} onChange={onChange} placeholder="vd: Nguyễn Văn An" />
-          <Field label="Email" name="email" type="email" form={form} errors={errors} onChange={onChange} placeholder="vd: an.nguyen@gmail.com" />
-          <label>Mật khẩu
+          <Field label="Email *" name="email" type="email" form={form} errors={errors} onChange={onChange} placeholder="vd: an.nguyen@gmail.com" />
+          <label>Mật khẩu *
             <PasswordInput name="password" value={form.password} onChange={onChange} placeholder="Từ 8 ký tự" />
             {form.password && (
               <span className={`meter m${st}`}><i /><i /><i /><em>{STRENGTH_TEXT[st]}</em></span>
             )}
             {errors.password && <span className="error">{errors.password}</span>}
           </label>
-          <label>Nhập lại mật khẩu
+          <label>Nhập lại mật khẩu *
             <PasswordInput name="confirm" value={form.confirm} onChange={onChange} />
             {errors.confirm && <span className="error">{errors.confirm}</span>}
           </label>

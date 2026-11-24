@@ -3,10 +3,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import client, { errorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { initials } from '../components/Layout';
+import ReportDialog from '../components/ReportDialog';
 import { Modal, StatusBadge, Toast } from '../components/ui';
 import { APP_STATUS, JOB_STATUS, dateText, daysAgo, salaryText } from '../utils/format';
 
-// MH-03 – Chi tiết tin + hộp thoại ứng tuyển (PB-08, PB-09) + nút Lưu tin (PB-20)
+// MH-03 – Chi tiết tin + hộp thoại ứng tuyển (PB-08, PB-09) + nút Lưu tin (PB-20) + Báo cáo tin (PB-21)
 export default function JobDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -20,6 +21,8 @@ export default function JobDetailPage() {
   const [sending, setSending] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const [reported, setReported] = useState(false);
   const [toast, setToast] = useState({ text: '' });
   const closeToast = useCallback(() => setToast({ text: '' }), []);
   const isStudent = user?.role === 'STUDENT';
@@ -128,6 +131,11 @@ export default function JobDetailPage() {
               {saving ? 'Đang lưu...' : (saved ? 'Đã lưu – bỏ lưu' : 'Lưu tin')}
             </button>
           )}
+          {isStudent && (
+            <button type="button" className="btn full report-btn" disabled={reported} onClick={() => setReporting(true)}>
+              {reported ? 'Đã báo cáo tin này' : 'Báo cáo tin'}
+            </button>
+          )}
         </div>
       </section>
 
@@ -197,6 +205,13 @@ export default function JobDetailPage() {
             <span className="count">{letter.length}/2000 ký tự</span>
           </label>
         </Modal>
+      )}
+      {reporting && (
+        <ReportDialog job={job} onClose={() => setReporting(false)} onDone={(text, ok) => {
+          setReporting(false);
+          if (ok) setReported(true);
+          setToast({ text, type: 'success' });
+        }} />
       )}
       <Toast {...toast} onClose={closeToast} />
     </div>

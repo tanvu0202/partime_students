@@ -38,3 +38,16 @@ export function dateText(iso) {
   const d = new Date(iso);
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
+
+// Báo cáo tin đáng ngờ (PB-21): lý do và trạng thái xử lý
+export const REPORT_REASONS = [
+  ['DEPOSIT', 'Đòi đặt cọc / thu phí'],
+  ['FALSE_INFO', 'Thông tin sai sự thật'],
+  ['SCAM', 'Có dấu hiệu lừa đảo'],
+  ['OTHER', 'Lý do khác'],
+];
+export const REPORT_STATUS = {
+  PENDING: ['Chờ xử lý', 'pending'],
+  RESOLVED: ['Đã gỡ tin', 'rejected'],
+  DISMISSED: ['Đã bỏ qua', 'closed'],
+};

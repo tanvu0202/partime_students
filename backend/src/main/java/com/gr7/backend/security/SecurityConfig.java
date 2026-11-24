@@ -50,19 +50,21 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/api/hello", "/error").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/auth/google", "/api/auth/social/complete",
+                .requestMatchers(HttpMethod.POST, "/api/auth/google", "/api/auth/facebook", "/api/auth/social/complete",
                         "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 // Thứ tự quan trọng – luật cụ thể đặt trước luật chung
                 .requestMatchers(HttpMethod.GET, "/api/jobs/*/applications").hasRole("EMPLOYER")
                 .requestMatchers(HttpMethod.GET, "/api/jobs", "/api/jobs/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/jobs/*/applications").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.POST, "/api/jobs/*/reports").hasRole("STUDENT")
                 .requestMatchers("/api/jobs", "/api/jobs/**").hasRole("EMPLOYER")
                 .requestMatchers("/api/applications/me").hasRole("STUDENT")
                 .requestMatchers(HttpMethod.PATCH, "/api/applications/*/status").hasRole("EMPLOYER")
                 .requestMatchers("/api/students/**").hasRole("STUDENT")
                 .requestMatchers("/api/employers/**").hasRole("EMPLOYER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/users/me/**").hasAnyRole("STUDENT", "EMPLOYER")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(rs -> rs
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))

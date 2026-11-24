@@ -114,6 +114,13 @@ public class JobService {
         if (j.getStatus() == JobStatus.CLOSED) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Tin này đã được đóng trước đó");
         }
+        // Bảng 4.13: chỉ tin Đang tuyển hoặc Đã nhận người mới chuyển sang Đã đóng
+        if (j.getStatus() == JobStatus.PENDING || j.getStatus() == JobStatus.REJECTED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Tin chưa được duyệt, hãy xóa tin nếu không cần đăng nữa");
+        }
+        if (j.getStatus() == JobStatus.COMPLETED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Tin đã hoàn thành, không đóng được nữa");
+        }
         j.setStatus(JobStatus.CLOSED);
         return JobResponse.from(j);
     }

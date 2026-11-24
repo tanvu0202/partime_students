@@ -21,12 +21,14 @@ public class ApplicantService {
     private final ApplicationRepository applications;
     private final JobPostRepository jobs;
     private final NotificationService notifications;
+    private final ApplicationMailService mails;
 
     public ApplicantService(ApplicationRepository applications, JobPostRepository jobs,
-                            NotificationService notifications) {
+                            NotificationService notifications, ApplicationMailService mails) {
         this.applications = applications;
         this.jobs = jobs;
         this.notifications = notifications;
+        this.mails = mails;
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +61,9 @@ public class ApplicantService {
                 (ok ? "Chúc mừng, bạn đã được nhận vào tin " : "Đơn của bạn chưa phù hợp với tin ")
                         + NotificationService.quote(a.getJob().getTitle()),
                 "/student/applications");
-        return ApplicantResponse.from(applications.saveAndFlush(a));
+        Application saved = applications.saveAndFlush(a);
+        mails.applicationResult(saved);   // PB-22: email nếu sinh viên bật nhận email
+        return ApplicantResponse.from(saved);
     }
 
     @Transactional(readOnly = true)

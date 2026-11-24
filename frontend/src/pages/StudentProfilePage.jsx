@@ -4,6 +4,7 @@ import client, { fileUrl, errorMessage, fieldErrors } from '../api/client';
 import { initials } from '../components/Layout';
 import { Progress, PromoBanner, Toast } from '../components/ui';
 import { MAX_SKILLS, SKILL_GROUPS, joinSkills, parseSkills } from '../utils/skills';
+import EmailSettingCard from '../components/EmailSettingCard';
 
 const BANNERS = [
   { tag: 'Mẹo ứng tuyển', title: 'Đơn có lời giới thiệu riêng được duyệt nhanh hơn', text: 'Viết 2–3 câu nói rõ ca bạn rảnh và kinh nghiệm liên quan.', big: '2x', bigNote: 'tỉ lệ được xem', cta: 'Xem đơn của tôi', to: '/student/applications', theme: 'yellow' },
@@ -161,6 +162,7 @@ export default function StudentProfilePage() {
         </form>
 
         <aside className="side-col">
+          <EmailSettingCard role="STUDENT" onMessage={(text, type) => setToast({ text, type })} />
           <div className="card">
             <h2>CV của bạn</h2>
             {info.cvUrl ? (

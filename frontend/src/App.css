@@ -419,7 +419,7 @@ select { font: inherit; padding: 10px 12px; border: 1px solid #D1D5DB; border-ra
 .row-main { flex: 1; min-width: 0; }
 .row-side { width: 200px; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; text-align: right; }
 .row-side small { font-size: 12px; color: var(--phu); line-height: 1.4; }
-.letter { margin-top: 10px; font-size: 14px; color: #4B5563; background: #F9FAFB; border-radius: 8px; padding: 10px 12px; line-height: 1.5; white-space: pre-line; }
+.letter { margin-top: 10px; font-size: 14px; color: #4B5563; background: #F9FAFB; border-radius: 8px; padding: 10px 12px; line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; }
 .link-chip { text-decoration: none; color: var(--tim); }
 .list-tools { display: flex; align-items: center; gap: 10px; }
 .sort { padding: 6px 10px; font-size: 13px; }
@@ -542,6 +542,15 @@ img { max-width: 100%; }
   .form-grid, .detail-grid { grid-template-columns: 1fr; }
   .nav { padding: 0 18px; }
   .nav .who-text { display: none; }
+}
+/* Máy tính bảng (641 – 900 px): menu đủ mục của sinh viên không vừa 1 hàng, chuyển sang 2 hàng như điện thoại */
+@media (max-width: 900px) {
+  .nav { position: static; flex-wrap: wrap; height: auto; padding: 10px 18px 8px; gap: 6px; }
+  .nav .logo { order: 0; flex: 1; }
+  .nav .btn { order: 1; }
+  .nav .who { display: none; }
+  .nav .spacer { order: 2; flex-basis: 100%; height: 0; }
+  .nav-item { order: 3; }
 }
 @media (max-width: 900px) {
   .search-band { grid-template-columns: 1fr 1fr; }
@@ -818,3 +827,41 @@ img { max-width: 100%; }
 .skill-chosen .chip-x { width: 22px; height: 22px; padding: 0; line-height: 1; font-size: 15px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
 .skill-pick .hint { margin: 0; font-size: 13px; }
 .skill-pick .hint.old { color: #B45309; }
+
+/* Báo cáo tin đáng ngờ (PB-21): nút ở MH-03, hộp thoại chọn lý do */
+.report-btn { margin-top: 10px; background: #fff; color: #6B7280; border-color: #E5E7EB; font-weight: 600; }
+.report-btn:hover:not(:disabled) { border-color: var(--do); color: var(--do); }
+.report-btn:disabled { color: #9CA3AF; cursor: default; }
+.report-reasons { border: 0; padding: 0; margin: 4px 0 14px; display: flex; flex-direction: column; gap: 8px; }
+.report-reasons legend { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px; padding: 0; }
+.report-reason { flex-direction: row; align-items: center; gap: 10px; font-weight: 500; padding: 10px 12px; border: 1.5px solid #E5E7EB; border-radius: 9px; cursor: pointer; }
+.report-reason.on { border-color: #5B2BB0; background: #F3EEFF; }
+.report-reason input { accent-color: #5B2BB0; width: 16px; height: 16px; margin: 0; }
+
+/* MH-16 Xử lý báo cáo tin (tab Báo cáo tin trong trang Quản trị) */
+.report-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; margin-top: 14px; }
+.report-detail { display: flex; flex-direction: column; gap: 6px; position: sticky; top: 84px; }
+.report-detail h2 { font-size: 17px; margin-bottom: 4px; }
+.report-job { text-decoration: none; color: var(--chu); }
+.report-job:hover b { color: var(--tim); text-decoration: underline; }
+.report-sub { font-size: 13px; color: var(--phu); padding-bottom: 10px; border-bottom: 1px solid var(--vien); }
+.report-items { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow-y: auto; }
+.report-items li { padding: 12px 0; border-bottom: 1px solid #F1F2F5; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.report-items li p { margin: 0; font-size: 14px; color: #374151; line-height: 1.5; }
+.report-items li small { font-size: 12.5px; color: var(--phu); }
+.filter-chip.plain { padding: 4px 12px; }
+.report-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+@media (max-width: 1000px) {
+  .report-layout { grid-template-columns: 1fr; }
+  .report-detail { position: static; }
+}
+
+/* Công tắc bật / tắt nhận email (PB-22) */
+.switch-row { flex-direction: row; align-items: center; gap: 12px; font-weight: 600; cursor: pointer; margin: 4px 0 10px; }
+.switch-row input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch-track { flex: none; width: 42px; height: 24px; border-radius: 12px; background: #D1D5DB; position: relative; transition: background .15s; }
+.switch-track i { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: left .15s; }
+.switch-row input:checked + .switch-track { background: #5B2BB0; }
+.switch-row input:checked + .switch-track i { left: 21px; }
+.switch-row input:focus-visible + .switch-track { outline: 2px solid #FFD43B; outline-offset: 2px; }
+.switch-row input:disabled + .switch-track { opacity: .6; }

@@ -2,39 +2,49 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import client, { errorMessage } from '../api/client';
 import { Confirm, Modal, StatusBadge, Toast } from '../components/ui';
-import { JOB_STATUS, dateText } from '../utils/format';
+import { JOB_STATUS, REPORT_STATUS, dateText } from '../utils/format';
 
-// MH-12 – Trang Quản trị: quản lý người dùng (PB-15) và kiểm duyệt tin (PB-16).
-// Tab mới (ví dụ "Báo cáo tin" ở Sprint 5) chỉ cần thêm vào mảng TABS.
-const TABS = [['users', 'Người dùng'], ['jobs', 'Tin đăng']];
+// MH-12 – Trang Quản trị: quản lý người dùng (PB-15), kiểm duyệt tin (PB-16, PB-24)
+// và MH-16 – tab Báo cáo tin (PB-21).
+const TABS = [['users', 'Người dùng'], ['jobs', 'Tin đăng'], ['reports', 'Báo cáo tin']];
 
 const ROLE = { STUDENT: 'Sinh viên', EMPLOYER: 'Nhà tuyển dụng', ADMIN: 'Quản trị viên' };
 const USER_STATUS = { ACTIVE: ['Đang hoạt động', 'open'], LOCKED: ['Đã khóa', 'rejected'] };
 
 export default function AdminPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get('tab') === 'jobs' ? 'jobs' : 'users';
+  const tab = TABS.some(([k]) => k === searchParams.get('tab')) ? searchParams.get('tab') : 'users';
+  const [pendingReports, setPendingReports] = useState(0);
 
   const pickTab = (k) => {
-    setSearchParams(k === 'jobs' ? { tab: 'jobs' } : {}, { replace: true });
+    setSearchParams(k === 'users' ? {} : { tab: k }, { replace: true });
   };
+
+  // Số tin đang có báo cáo chờ xử lý, hiện trên nhãn tab
+  const countReports = useCallback(() => {
+    client.get('/api/admin/reports', { params: { status: 'PENDING' } })
+      .then((res) => setPendingReports(res.data.length))
+      .catch(() => {});
+  }, []);
+  useEffect(() => { countReports(); }, [countReports]);
 
   return (
     <div className="list-page admin">
       <div className="page-head">
         <div>
           <h1>Quản trị</h1>
-          <p className="lead">Khóa tài khoản vi phạm và ẩn tin đăng sai quy định. Không xóa dữ liệu, có thể mở lại khi cần.</p>
+          <p className="lead">Duyệt tin mới, xử lý báo cáo, khóa tài khoản vi phạm và ẩn tin sai quy định. Không xóa dữ liệu, có thể mở lại khi cần.</p>
         </div>
       </div>
       <div className="tabs" role="tablist">
         {TABS.map(([k, label]) => (
           <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''}
-            onClick={() => pickTab(k)}>{label}</button>
+            onClick={() => pickTab(k)}>{label}{k === 'reports' && pendingReports > 0 ? ` (${pendingReports})` : ''}</button>
         ))}
       </div>
       {tab === 'users' && <UsersTab />}
       {tab === 'jobs' && <JobsTab />}
+      {tab === 'reports' && <ReportsTab onChanged={countReports} />}
     </div>
   );
 }
@@ -383,6 +393,147 @@ function JobsTab() {
         />
       )}
 
+      <Toast {...toast} onClose={closeToast} />
+    </>
+  );
+}
+
+const REPORT_FILTERS = [['PENDING', 'Chờ xử lý'], ['RESOLVED', 'Đã gỡ tin'], ['DISMISSED', 'Đã bỏ qua'], ['', 'Tất cả']];
+
+// MH-16 – Xử lý báo cáo tin (PB-21): mỗi dòng là một tin cùng các báo cáo cùng trạng thái, khung bên phải là chi tiết
+function ReportsTab({ onChanged }) {
+  const [status, setStatus] = useState('PENDING');
+  const { list, error, reload } = useAdminList('/api/admin/reports', { status: status || undefined });
+  const [selected, setSelected] = useState(null);   // khóa jobId:status của dòng đang xem
+  const [ask, setAsk] = useState(null);             // { action: 'HIDE_JOB' | 'DISMISS', row }
+  const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState({ text: '' });
+  const closeToast = useCallback(() => setToast({ text: '' }), []);
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.fromNotif) { reload(); onChanged(); }
+  }, [location.state?.fromNotif, reload, onChanged]);
+
+  const keyOf = (r) => `${r.jobId}:${r.status}`;
+  const current = (list || []).find((r) => keyOf(r) === selected) || (list && list[0]) || null;
+
+  const submit = async () => {
+    const { action, row } = ask;
+    setBusy(true);
+    try {
+      const res = await client.patch(`/api/admin/reports/${row.reportId}`, { action });
+      setToast({
+        text: action === 'HIDE_JOB'
+          ? `Đã gỡ tin "${row.jobTitle}" và xử lý ${res.data.handledCount} báo cáo`
+          : `Đã bỏ qua ${res.data.handledCount} báo cáo của tin "${row.jobTitle}"`,
+        type: 'success',
+      });
+      setSelected(null);
+      reload();
+      onChanged();
+    } catch (err) {
+      setToast({ text: errorMessage(err), type: 'error' });
+    } finally {
+      setBusy(false);
+      setAsk(null);
+    }
+  };
+
+  return (
+    <>
+      <div className="admin-filter">
+        <div className="tabs small-tabs">
+          {REPORT_FILTERS.map(([v, label]) => (
+            <button key={v} type="button" className={status === v ? 'on' : ''}
+              onClick={() => { setStatus(v); setSelected(null); }}>{label}</button>
+          ))}
+        </div>
+        {list && <span className="admin-count">{list.length} tin bị báo cáo</span>}
+      </div>
+
+      {error && <div className="card muted-box"><b>{error}</b></div>}
+      {!list && !error && <div className="card muted-box">Đang tải danh sách báo cáo...</div>}
+      {list && list.length === 0 && (
+        <div className="card muted-box">
+          <b>{status === 'PENDING' ? 'Không có báo cáo nào đang chờ xử lý' : 'Không có báo cáo nào ở mục này'}</b>
+          <p>Sinh viên báo cáo tin ở trang chi tiết tin, báo cáo mới sẽ hiện ở mục Chờ xử lý.</p>
+        </div>
+      )}
+
+      {list && list.length > 0 && (
+        <div className="report-layout">
+          <div className="card admin-table">
+            <table>
+              <thead>
+                <tr><th>Tin bị báo cáo</th><th>Lượt</th><th>Lý do chính</th><th>Gần nhất</th><th>Trạng thái</th><th aria-label="Thao tác" /></tr>
+              </thead>
+              <tbody>
+                {list.map((r) => (
+                  <tr key={keyOf(r)} className={current && keyOf(current) === keyOf(r) ? 'hl' : ''}>
+                    <td>
+                      <Link to={`/admin/jobs/${r.jobId}`}><b>{r.jobTitle}</b></Link>
+                      <small>{r.companyName}{r.jobHidden ? ' · Tin đang bị ẩn' : ''}</small>
+                    </td>
+                    <td><b>{r.reportCount}</b></td>
+                    <td>{r.mainReasonLabel}</td>
+                    <td>{dateText(r.latestAt)}</td>
+                    <td><StatusBadge map={REPORT_STATUS} value={r.status} /></td>
+                    <td className="act">
+                      <div className="row-btns" style={{ justifyContent: 'flex-end' }}>
+                        <button type="button" className="btn ghost small" onClick={() => setSelected(keyOf(r))}>Xem</button>
+                        {r.status === 'PENDING' && (
+                          <>
+                            <button type="button" className="btn danger small" onClick={() => setAsk({ action: 'HIDE_JOB', row: r })}>Gỡ tin</button>
+                            <button type="button" className="btn ghost small" onClick={() => setAsk({ action: 'DISMISS', row: r })}>Bỏ qua</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {current && (
+            <aside className="card report-detail">
+              <h2>Chi tiết báo cáo</h2>
+              <Link to={`/admin/jobs/${current.jobId}`} className="report-job"><b>{current.jobTitle}</b></Link>
+              <span className="report-sub">{current.companyName} · {current.reportCount} lượt báo cáo</span>
+              <ul className="report-items">
+                {current.reports.map((x) => (
+                  <li key={x.id}>
+                    <span className="filter-chip plain">{x.reasonLabel}</span>
+                    <p>{x.description || 'Không có mô tả thêm.'}</p>
+                    <small>{x.reporterName} · {dateText(x.createdAt)}{x.handledAt ? ` · Xử lý ${dateText(x.handledAt)}` : ''}</small>
+                  </li>
+                ))}
+              </ul>
+              {current.status === 'PENDING' && (
+                <div className="report-actions">
+                  <button type="button" className="btn danger" onClick={() => setAsk({ action: 'HIDE_JOB', row: current })}>Gỡ tin</button>
+                  <button type="button" className="btn ghost" onClick={() => setAsk({ action: 'DISMISS', row: current })}>Bỏ qua</button>
+                </div>
+              )}
+            </aside>
+          )}
+        </div>
+      )}
+
+      {ask && (
+        <Confirm
+          title={ask.action === 'HIDE_JOB' ? 'Gỡ tin bị báo cáo?' : 'Bỏ qua báo cáo?'}
+          text={ask.action === 'HIDE_JOB'
+            ? `Tin "${ask.row.jobTitle}" sẽ bị ẩn khỏi tìm kiếm và trang chi tiết. Nhà tuyển dụng và ${ask.row.reportCount} sinh viên đã báo cáo sẽ nhận thông báo. Có thể hiện lại tin ở tab Tin đăng.`
+            : `${ask.row.reportCount} báo cáo của tin "${ask.row.jobTitle}" sẽ chuyển sang Đã bỏ qua, tin vẫn hiển thị. Sinh viên đã báo cáo sẽ nhận thông báo kết quả.`}
+          okText={ask.action === 'HIDE_JOB' ? 'Gỡ tin' : 'Bỏ qua'}
+          danger={ask.action === 'HIDE_JOB'}
+          busy={busy}
+          onOk={submit}
+          onClose={() => setAsk(null)}
+        />
+      )}
       <Toast {...toast} onClose={closeToast} />
     </>
   );
